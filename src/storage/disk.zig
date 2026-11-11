@@ -1,7 +1,7 @@
 const std = @import("std");
 
-pub const SectorSize: u64 = 512;
-pub const Alignment1MiB: u64 = 2048; // 1 MiB / 512 bytes = 2048 sectors
+pub const SectorSize = 512;
+pub const Alignment1MiB = (1024 * 1024) / SectorSize;
 
 pub const DiskGap = struct {
     start_sector: u64,
