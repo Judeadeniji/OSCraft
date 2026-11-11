@@ -1,0 +1,24 @@
+# Zig build artifacts
+zig-cache/
+zig-out/
+.zig-cache/
+
+# Binary & object files
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+*.exe
+
+# System & editor files
+.DS_Store
+*~
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# OSCraft temporary state
+/run/
+*.log
