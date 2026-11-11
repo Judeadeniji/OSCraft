@@ -1,3 +1,9 @@
+//! OSCraft — Storage Engine: Topological & Behavioral Tests
+//!
+//! Author:  Oluwaferanmi Adeniji <https://github.com/Judeadeniji>
+//! Date:    November 2026
+//! License: MIT
+
 const std = @import("std");
 const disk_mod = @import("disk.zig");
 
@@ -10,19 +16,15 @@ const Alignment1MiB = disk_mod.Alignment1MiB;
 const GptHeaderSectors = disk_mod.GptHeaderSectors;
 const FirstUsableSector = disk_mod.FirstUsableSector;
 
-// ============================================================================
-// Comprehensive Behavioral & Flow Test Suite
-// ============================================================================
-
 test "flow: completely empty disk creates single full-range gap" {
     const testing = std.testing;
     const allocator = testing.allocator;
 
     var disk = Disk{
         .allocator = allocator,
-        .name = "sda",
-        .node = "/dev/sda",
-        .model = "Raw NVMe",
+        .name = "nvme0n1",
+        .node = "/dev/nvme0n1",
+        .model = "Generic NVMe Drive",
         .size_sectors = 1_000_000,
         .size_bytes = 1_000_000 * SectorSize,
         .partitions = .empty,
@@ -39,17 +41,17 @@ test "flow: completely empty disk creates single full-range gap" {
     try testing.expect(gap.is_aligned);
 }
 
-test "flow: real-world multi-boot disk with deleted partition (Bliss OS scenario)" {
+test "flow: multi-boot partition reclamation with non-contiguous gap" {
     const testing = std.testing;
     const allocator = testing.allocator;
 
-    // Mimic the exact 500GB drive (/dev/sda) from our actual system:
+    // Synthetic 500 GB multi-boot drive layout with a reclaimed gap:
     // Total sectors: 976,773,168 sectors (~500.1 GB)
     var disk = Disk{
         .allocator = allocator,
         .name = "sda",
         .node = "/dev/sda",
-        .model = "Samsung SSD",
+        .model = "High-Performance Solid State Drive",
         .size_sectors = 976_773_168,
         .size_bytes = 976_773_168 * SectorSize,
         .partitions = .empty,
@@ -57,7 +59,7 @@ test "flow: real-world multi-boot disk with deleted partition (Bliss OS scenario
     };
     defer disk.deinit();
 
-    // sda1: ESP (100 MB)
+    // Partition 1: EFI System Partition (100 MB)
     try disk.partitions.append(allocator, .{
         .name = "sda1",
         .node = "/dev/sda1",
@@ -65,9 +67,11 @@ test "flow: real-world multi-boot disk with deleted partition (Bliss OS scenario
         .start_sector = 2048,
         .size_sectors = 204800,
         .size_bytes = 204800 * SectorSize,
+        .fstype = "vfat",
+        .label = "ESP",
     });
 
-    // sda2: MSR (16 MB)
+    // Partition 2: Reserved Partition (16 MB)
     try disk.partitions.append(allocator, .{
         .name = "sda2",
         .node = "/dev/sda2",
@@ -77,7 +81,7 @@ test "flow: real-world multi-boot disk with deleted partition (Bliss OS scenario
         .size_bytes = 32768 * SectorSize,
     });
 
-    // sda4: OEM Recovery (1 GB)
+    // Partition 4: Diagnostic / Recovery Partition (1 GB)
     try disk.partitions.append(allocator, .{
         .name = "sda4",
         .node = "/dev/sda4",
@@ -85,9 +89,10 @@ test "flow: real-world multi-boot disk with deleted partition (Bliss OS scenario
         .start_sector = 239616,
         .size_sectors = 2097152,
         .size_bytes = 2097152 * SectorSize,
+        .label = "Recovery",
     });
 
-    // sda5: Btrfs Root (starts at sector 687,720,448, size ~137.8 GB)
+    // Partition 5: Main Root Filesystem (starts at sector 687,720,448, size ~137.8 GB)
     try disk.partitions.append(allocator, .{
         .name = "sda5",
         .node = "/dev/sda5",
@@ -95,11 +100,13 @@ test "flow: real-world multi-boot disk with deleted partition (Bliss OS scenario
         .start_sector = 687720448,
         .size_sectors = 289052687,
         .size_bytes = 289052687 * SectorSize,
+        .fstype = "btrfs",
+        .label = "root",
     });
 
     try disk.calculateGaps();
 
-    // Verify: exactly 1 significant gap exists (between sda4 and sda5)
+    // Verify: exactly 1 significant gap exists between partition 4 and partition 5
     try testing.expectEqual(@as(usize, 1), disk.gaps.items.len);
 
     const gap = disk.gaps.items[0];
@@ -119,9 +126,9 @@ test "flow: partitions added out of order are topologically sorted" {
 
     var disk = Disk{
         .allocator = allocator,
-        .name = "sda",
-        .node = "/dev/sda",
-        .model = "Test Out Of Order",
+        .name = "sdb",
+        .node = "/dev/sdb",
+        .model = "Generic Block Device",
         .size_sectors = 20_000_000,
         .size_bytes = 20_000_000 * SectorSize,
         .partitions = .empty,
@@ -131,8 +138,8 @@ test "flow: partitions added out of order are topologically sorted" {
 
     // Add partition 5 first!
     try disk.partitions.append(allocator, .{
-        .name = "sda5",
-        .node = "/dev/sda5",
+        .name = "sdb5",
+        .node = "/dev/sdb5",
         .part_num = 5,
         .start_sector = 10_000_000,
         .size_sectors = 2_000_000,
@@ -141,8 +148,8 @@ test "flow: partitions added out of order are topologically sorted" {
 
     // Add partition 1 second!
     try disk.partitions.append(allocator, .{
-        .name = "sda1",
-        .node = "/dev/sda1",
+        .name = "sdb1",
+        .node = "/dev/sdb1",
         .part_num = 1,
         .start_sector = 2048,
         .size_sectors = 204800,
@@ -151,11 +158,11 @@ test "flow: partitions added out of order are topologically sorted" {
 
     try disk.calculateGaps();
 
-    // Partitions should be sorted: sda1 (2048..206847), then gap, then sda5 (10_000_000..), then end gap
+    // Partitions should be sorted: sdb1 (2048..206847), then gap, then sdb5 (10_000_000..), then end gap
     try testing.expectEqual(@as(u64, 2048), disk.partitions.items[0].start_sector);
     try testing.expectEqual(@as(u64, 10_000_000), disk.partitions.items[1].start_sector);
 
-    // Gap between sda1 and sda5
+    // Gap between sdb1 and sdb5
     const middle_gap = disk.gaps.items[0];
     try testing.expectEqual(@as(u64, 206848), middle_gap.start_sector);
     try testing.expectEqual(@as(u64, 9_999_999), middle_gap.end_sector);
@@ -167,9 +174,9 @@ test "flow: contiguous partitions produce zero gaps" {
 
     var disk = Disk{
         .allocator = allocator,
-        .name = "sda",
-        .node = "/dev/sda",
-        .model = "Packed Disk",
+        .name = "sdc",
+        .node = "/dev/sdc",
+        .model = "Packed Storage Device",
         .size_sectors = 4096 + GptHeaderSectors,
         .size_bytes = (4096 + GptHeaderSectors) * SectorSize,
         .partitions = .empty,
@@ -179,8 +186,8 @@ test "flow: contiguous partitions produce zero gaps" {
 
     // Part 1: exactly 2048 to 3071
     try disk.partitions.append(allocator, .{
-        .name = "sda1",
-        .node = "/dev/sda1",
+        .name = "sdc1",
+        .node = "/dev/sdc1",
         .part_num = 1,
         .start_sector = 2048,
         .size_sectors = 1024,
@@ -189,8 +196,8 @@ test "flow: contiguous partitions produce zero gaps" {
 
     // Part 2: exactly 3072 to 4095 (no gap between 3071 and 3072!)
     try disk.partitions.append(allocator, .{
-        .name = "sda2",
-        .node = "/dev/sda2",
+        .name = "sdc2",
+        .node = "/dev/sdc2",
         .part_num = 2,
         .start_sector = 3072,
         .size_sectors = 1024,
@@ -209,9 +216,9 @@ test "flow: sub-1MiB residual gaps are ignored" {
 
     var disk = Disk{
         .allocator = allocator,
-        .name = "sda",
-        .node = "/dev/sda",
-        .model = "Misaligned Disk",
+        .name = "sdd",
+        .node = "/dev/sdd",
+        .model = "Legacy Partitioned Disk",
         .size_sectors = 10_000,
         .size_bytes = 10_000 * SectorSize,
         .partitions = .empty,
@@ -221,8 +228,8 @@ test "flow: sub-1MiB residual gaps are ignored" {
 
     // Part 1: 2048 to 3071
     try disk.partitions.append(allocator, .{
-        .name = "sda1",
-        .node = "/dev/sda1",
+        .name = "sdd1",
+        .node = "/dev/sdd1",
         .part_num = 1,
         .start_sector = 2048,
         .size_sectors = 1024,
@@ -231,8 +238,8 @@ test "flow: sub-1MiB residual gaps are ignored" {
 
     // Part 2: 3572 to 5000 (leaves 3072..3571 = 500 sectors, which is < Alignment1MiB / 2048 sectors)
     try disk.partitions.append(allocator, .{
-        .name = "sda2",
-        .node = "/dev/sda2",
+        .name = "sdd2",
+        .node = "/dev/sdd2",
         .part_num = 2,
         .start_sector = 3572,
         .size_sectors = 1429,

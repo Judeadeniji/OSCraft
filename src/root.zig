@@ -1,4 +1,9 @@
-//! By convention, root.zig is the root source file when making a package.
+//! OSCraft — Core Module Registry
+//!
+//! Author:  Oluwaferanmi Adeniji <https://github.com/Judeadeniji>
+//! Date:    November 2026
+//! License: MIT
+
 const std = @import("std");
 const Io = std.Io;
 
@@ -6,16 +11,8 @@ pub const storage = struct {
     pub const disk = @import("storage/disk.zig");
 };
 
-pub fn printAnotherMessage(writer: *Io.Writer) Io.Writer.Error!void {
-    try writer.print("OSCraft: Live partition & kexec utility ready.\n", .{});
-}
-
-pub fn add(a: i32, b: i32) i32 {
-    return a + b;
-}
-
-test "basic add functionality" {
-    try std.testing.expect(add(3, 7) == 10);
+pub fn printBanner(writer: *Io.Writer) Io.Writer.Error!void {
+    try writer.print("OSCraft: Dynamic Partitioning, Boot Hygiene & Live kexec Engine\n", .{});
 }
 
 test {

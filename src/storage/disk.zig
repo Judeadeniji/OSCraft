@@ -1,3 +1,9 @@
+//! OSCraft — Storage Engine: Disk Topology & Gap Analysis
+//!
+//! Author:  Oluwaferanmi Adeniji <https://github.com/Judeadeniji>
+//! Date:    November 2026
+//! License: MIT
+
 const std = @import("std");
 
 pub const SectorSize = 512;
