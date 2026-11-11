@@ -20,4 +20,5 @@ test "basic add functionality" {
 
 test {
     _ = storage.disk;
+    _ = @import("storage/disk_test.zig");
 }
