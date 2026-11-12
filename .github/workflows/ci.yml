@@ -16,7 +16,7 @@ jobs:
       - name: Setup Zig
         uses: mlugg/setup-zig@v2
         with:
-          version: master
+          version: 0.17.0
 
       - name: Verify Code Formatting
         run: zig fmt --check src/ build.zig
