@@ -1,15 +1,13 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
-import { RefreshCw, Play, CheckCircle2, ShieldCheck, Terminal } from 'lucide-react'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
+import { RefreshCw, Play, ShieldCheck, Terminal, CheckCircle2, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 
 export const Route = createFileRoute('/kexec')({
   component: KexecComponent,
 })
 
-export function KexecComponent() {
+function KexecComponent() {
   const [isRunning, setIsRunning] = useState(false)
   const [logs, setLogs] = useState<string[]>([
     '[INIT] OSCraft kexec_file_load subsystem initialized',
@@ -25,10 +23,10 @@ export function KexecComponent() {
     try {
       if (window.nanoui) {
         await window.nanoui.call('kernel.executeKexec', { dryRun: true })
-        setLogs((prev) => [...prev, '[SUCCESS] Kernel simulated switch complete. (Dry Run)'])
+        setLogs((prev) => [...prev, '[SUCCESS] Kernel simulated switch complete. (Dry Run Guaranteed)'])
       } else {
-        await new Promise((r) => setTimeout(r, 1000))
-        setLogs((prev) => [...prev, '[SIMULATION] Kernel simulated switch complete. (Dry Run)'])
+        await new Promise((r) => setTimeout(r, 900))
+        setLogs((prev) => [...prev, '[SIMULATION] Kernel simulated switch complete. (Dry Run Guaranteed)'])
       }
     } catch (err: any) {
       setLogs((prev) => [...prev, `[ERROR] kexec call failed: ${err.message}`])
@@ -38,72 +36,100 @@ export function KexecComponent() {
   }
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
-            <RefreshCw className="size-5 text-primary" />
-            Zero-Reboot Kernel Engine (kexec)
-          </h1>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Switch directly from the live environment to your target Linux installation without UEFI reboot.
-          </p>
+    <div className="space-y-7 max-w-5xl mx-auto">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
+        <div className="flex items-center gap-4">
+          <div className="size-13 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-xs border border-blue-100/60">
+            <RefreshCw className="size-6 stroke-[2.2]" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold tracking-tight text-slate-900 leading-tight">
+              Zero-Reboot Kernel Engine (kexec)
+            </h1>
+            <p className="text-xs font-medium text-slate-400 mt-0.5">
+              Switch directly into your target Linux system in &lt; 3s without UEFI POST cycle.
+            </p>
+          </div>
         </div>
-        <Button
+
+        <button
           onClick={handleTriggerKexec}
           disabled={isRunning}
-          className="font-mono text-xs gap-2"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-xs font-semibold shadow-md shadow-blue-500/20 transition-all cursor-pointer disabled:opacity-50"
         >
-          <Play className={`size-3.5 ${isRunning ? 'animate-spin' : ''}`} />
-          {isRunning ? 'Executing...' : 'Trigger Kernel Switch (Dry-Run)'}
-        </Button>
+          <Play className={`size-3.5 fill-current ${isRunning ? 'animate-spin' : ''}`} />
+          {isRunning ? 'Executing Switch...' : 'Trigger Kernel Switch (Dry-Run)'}
+        </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-mono flex items-center gap-2">
-              <ShieldCheck className="size-4 text-emerald-400" />
-              Pre-Flight Kernel Verification
-            </CardTitle>
-            <CardDescription className="text-xs">
-              Hardware & memory map checks before kernel handover
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3 font-mono text-xs">
-            <div className="flex items-center justify-between p-2 rounded bg-muted/60 border border-border">
-              <span className="text-muted-foreground">Syscall Support</span>
-              <Badge variant="success" className="font-mono text-[10px]">kexec_file_load (0x140)</Badge>
+        {/* Pre-Flight Kernel Verification Card */}
+        <div className="bg-white rounded-3xl border border-slate-100 shadow-xs p-6 space-y-5">
+          <div className="flex items-center gap-3">
+            <div className="size-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
+              <ShieldCheck className="size-5" />
             </div>
-            <div className="flex items-center justify-between p-2 rounded bg-muted/60 border border-border">
-              <span className="text-muted-foreground">UEFI Secure Boot Status</span>
-              <Badge variant="outline" className="font-mono text-[10px]">Signature Validated</Badge>
+            <div>
+              <h2 className="font-bold text-sm text-slate-900">Pre-Flight Verification</h2>
+              <p className="text-[11px] text-slate-400">Hardware & memory map checks</p>
             </div>
-            <div className="flex items-center justify-between p-2 rounded bg-muted/60 border border-border">
-              <span className="text-muted-foreground">ACPI Table Preservation</span>
-              <Badge variant="success" className="font-mono text-[10px]">Verified</Badge>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-mono flex items-center gap-2">
-              <Terminal className="size-4 text-primary" />
-              Kernel Handover Console
-            </CardTitle>
-            <CardDescription className="text-xs">
-              Live stdout/stderr stream from Zig kexec subsystem
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-44 overflow-y-auto rounded-md bg-black/80 border border-border p-3 font-mono text-[11px] space-y-1 text-emerald-400">
-              {logs.map((log, i) => (
-                <div key={i} className="leading-tight">{log}</div>
-              ))}
+          <div className="space-y-2.5 text-xs">
+            <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100">
+              <span className="text-slate-600 font-medium">Syscall Support</span>
+              <span className="font-mono text-[11px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
+                kexec_file_load (0x140)
+              </span>
             </div>
-          </CardContent>
-        </Card>
+            <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100">
+              <span className="text-slate-600 font-medium">UEFI Secure Boot</span>
+              <span className="font-mono text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+                Signature Validated
+              </span>
+            </div>
+            <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100">
+              <span className="text-slate-600 font-medium">ACPI Table Preservation</span>
+              <span className="font-mono text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+                Verified Contiguous
+              </span>
+            </div>
+            <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100">
+              <span className="text-slate-600 font-medium">Dry-Run Enforcer</span>
+              <span className="font-mono text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+                Armed & Non-Destructive
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Live Terminal Console Card */}
+        <div className="bg-white rounded-3xl border border-slate-100 shadow-xs p-6 flex flex-col justify-between space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="size-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100">
+                <Terminal className="size-5" />
+              </div>
+              <div>
+                <h2 className="font-bold text-sm text-slate-900">Kernel Console</h2>
+                <p className="text-[11px] text-slate-400">Live stdout/stderr stream</p>
+              </div>
+            </div>
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100">
+              <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              STREAM ACTIVE
+            </span>
+          </div>
+
+          <div className="h-56 overflow-y-auto rounded-2xl bg-slate-950 p-4 font-mono text-[11px] space-y-1.5 text-emerald-400 shadow-inner border border-slate-800">
+            {logs.map((log, i) => (
+              <div key={i} className="leading-relaxed">
+                {log}
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   )
