@@ -189,6 +189,7 @@ pub fn detectOrphanEfiDirectories(
         // Universal ESP folders that must never be considered orphans
         if (std.ascii.eqlIgnoreCase(dir, "BOOT") or
             std.ascii.eqlIgnoreCase(dir, "Microsoft") or
+            std.ascii.eqlIgnoreCase(dir, "systemd") or
             std.ascii.eqlIgnoreCase(dir, "System Volume Information"))
         {
             continue;
