@@ -29,12 +29,20 @@ test "flow: cli command tree initialization and registration" {
     defer root.deinit();
 
     try testing.expectEqualStrings("oscraft", root.cmd_options.name);
-    try testing.expect(root.commands_by_name.count() >= 4);
+    try testing.expect(root.commands_by_name.count() >= 5);
 
     // Verify scan subcommand
     const scan_cmd = root.findCommand("scan");
     try testing.expect(scan_cmd != null);
     try testing.expect(scan_cmd.?.flags_by_name.contains("disk"));
+
+    // Verify expand subcommand
+    const expand_cmd = root.findCommand("expand");
+    try testing.expect(expand_cmd != null);
+    try testing.expect(expand_cmd.?.flags_by_name.contains("disk"));
+    try testing.expect(expand_cmd.?.flags_by_name.contains("mount"));
+    try testing.expect(expand_cmd.?.flags_by_name.contains("size"));
+    try testing.expect(expand_cmd.?.flags_by_name.contains("dry-run"));
 
     // Verify boot-clean subcommand
     const boot_clean_cmd = root.findCommand("boot-clean");
