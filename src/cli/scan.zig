@@ -69,28 +69,34 @@ fn scanSingleDisk(ctx: zli.CommandContext, disk_name: []const u8) !void {
 
     try ctx.writer.print("Target Disk: {s}\n", .{dev_path});
 
-    // Run sfdisk -d to get exact kernel partition table
-    const sfdisk_args = [_][]const u8{ "sfdisk", "-d", dev_path };
-    const run_res = std.process.run(ctx.allocator, ctx.io, .{
-        .argv = &sfdisk_args,
-    }) catch |err| {
-        try ctx.writer.print("  Unable to query partition table ({t}). Check permissions or disk node.\n", .{err});
-        return;
-    };
-    defer {
-        ctx.allocator.free(run_res.stdout);
-        ctx.allocator.free(run_res.stderr);
+    // Probe via sysfs directly (reliable, requires zero root privileges)
+    var maybe_disk: ?disk.Disk = probe.probeFromSysfs(ctx.allocator, ctx.io, dev_path) catch null;
+
+    if (maybe_disk == null) {
+        // Fallback to sfdisk -d
+        const sfdisk_args = [_][]const u8{ "sfdisk", "-d", dev_path };
+        const run_res = std.process.run(ctx.allocator, ctx.io, .{
+            .argv = &sfdisk_args,
+        }) catch |err| {
+            try ctx.writer.print("  Unable to query partition table ({t}). Check permissions or disk node.\n", .{err});
+            return;
+        };
+        defer {
+            ctx.allocator.free(run_res.stdout);
+            ctx.allocator.free(run_res.stderr);
+        }
+
+        if (run_res.term.success()) {
+            maybe_disk = probe.parseSfdiskDump(ctx.allocator, run_res.stdout) catch null;
+        }
     }
 
-    if (!run_res.term.success()) {
-        try ctx.writer.print("  sfdisk returned non-zero code. Disk may be unformatted or unpartitioned.\n", .{});
+    if (maybe_disk == null) {
+        try ctx.writer.print("  Unable to read partition table from sysfs or sfdisk.\n", .{});
         return;
     }
 
-    var parsed_disk = probe.parseSfdiskDump(ctx.allocator, run_res.stdout) catch |err| {
-        try ctx.writer.print("  Failed to parse disk layout ({t}).\n", .{err});
-        return;
-    };
+    var parsed_disk = maybe_disk.?;
     defer probe.freeDisk(&parsed_disk);
 
     try ctx.writer.print("  Total Capacity: {d:.2} GiB ({d} sectors)\n", .{
