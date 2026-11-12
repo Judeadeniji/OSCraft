@@ -114,6 +114,28 @@ pub fn probeFromSysfs(allocator: std.mem.Allocator, io: Io, disk_name_or_path: [
     };
 }
 
+/// Scans /sys/block and probes all physical storage disks present on the host system.
+pub fn probeAllDisks(allocator: std.mem.Allocator, io: Io) ![]disk.Disk {
+    var sys_block = try Io.Dir.openDirAbsolute(io, "/sys/block", .{ .iterate = true });
+    defer sys_block.close(io);
+
+    var disks_list: std.ArrayListUnmanaged(disk.Disk) = .empty;
+    errdefer {
+        for (disks_list.items) |*d| freeDisk(d);
+        disks_list.deinit(allocator);
+    }
+
+    var iter = sys_block.iterate();
+    while (try iter.next(io)) |entry| {
+        if (isPhysicalDisk(entry.name)) {
+            const d = probeFromSysfs(allocator, io, entry.name) catch continue;
+            try disks_list.append(allocator, d);
+        }
+    }
+
+    return disks_list.toOwnedSlice(allocator);
+}
+
 /// Parses the standard Linux `sfdisk -d` output dump format.
 /// Returns a fully populated Disk struct with its partitions parsed.
 pub fn parseSfdiskDump(allocator: std.mem.Allocator, dump: []const u8) !disk.Disk {
