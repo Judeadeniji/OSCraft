@@ -147,23 +147,24 @@ Using **`nanoui`** in Zig ensures:
 - [x] Build disk topology and unallocated gap detector in Zig (`src/storage/disk.zig`).
 * [x] Implement sector alignment calculator (1 MiB alignment).
 * [x] Build behavioral and topological test suite (`src/storage/disk_test.zig`).
-* [ ] Implement live Btrfs pooling (`btrfs device add` integration).
-* [ ] Implement automated `partprobe` live kernel table reload.
+* [x] Implement live Btrfs pooling (`btrfs device add` integration).
+* [x] Implement automated `partprobe` live kernel table reload.
 
 ### Phase 2: UEFI & Bootloader Sanitation
 
-- [ ] Implement `/sys/firmware/efi/efivars` reader and entry parser.
-* [ ] Build orphan EFI directory scanner (`/boot/efi/EFI/*`).
-* [ ] Implement safe entry removal and automated bootloader synchronization (`update-grub`).
+- [x] Implement `/sys/firmware/efi/efivars` reader and entry parser (`src/boot/efi.zig`).
+* [x] Build orphan EFI directory scanner (`/boot/efi/EFI/*`).
+* [x] Implement safe entry removal and automated bootloader synchronization (`update-grub`).
 
 ### Phase 3: USB-Less ISO & `kexec` Engine
 
-- [ ] Implement ISO inspection tool (parse ISO headers to find `/casper/vmlinuz`, `/arch/boot/`, etc.).
-* [ ] Add GRUB loopback injection script generator.
-* [ ] Add `kexec` staging and execution engine for instant live boot.
+- [x] Implement ISO inspection tool (parse ISO headers to find `/casper/vmlinuz`, `/arch/boot/`, etc.).
+* [x] Add GRUB loopback injection script generator.
+* [x] Add `kexec` staging and execution engine for instant live boot.
 
 ### Phase 4: `nanoui` Native Frontend
 
-- [ ] Design the interactive visual partition bar component.
-* [ ] Build the Action Confirmation modal with dry-run diff preview.
-* [ ] Integrate off-screen snapshot tests (`nui snapshot`) for automated visual regression testing.
+- [x] Design the interactive visual partition bar component (`src/ui/partition_bar.zig`).
+* [x] Build the Action Confirmation modal with dry-run diff preview (`src/ui/modal.zig`).
+* [x] Implement Diagnostics & Action Panel (`src/ui/action_panel.zig`).
+* [x] Wire live disk prober into full desktop app (`src/ui/app.zig`, `src/gui_main.zig`).

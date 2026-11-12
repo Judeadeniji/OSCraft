@@ -36,6 +36,10 @@
             .url = "https://github.com/xcaeser/zli/archive/v7.0.0.tar.gz",
             .hash = "zli-7.0.0-LeUjpkUXAQCxF5jREV4MG_wCYInnr1qdSu1Dg0qjzoQn",
         },
+        .nanoui = .{
+            .url = "git+https://github.com/justrach/nanoui",
+            .hash = "nanoui-0.14.0-we0KMck7OwDwEcwt0-a6KnXZOA7S_RYckkG2J5ecYESb",
+        },
     },
     .paths = .{
         "build.zig",
