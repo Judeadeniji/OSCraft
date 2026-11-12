@@ -1,4 +1,4 @@
-//! OSCraft — Application State Unit Tests
+//! OSCraft — Application State & Web IPC Unit Tests
 //!
 //! Author:  Oluwaferanmi Adeniji <https://github.com/Judeadeniji>
 //! Date:    November 2026
@@ -63,4 +63,33 @@ test "app: AppState selectedDisk management" {
 
     state.selected_disk = -1;
     try std.testing.expect(state.selectedDisk() == null);
+}
+
+test "app: toDto serialization for webview" {
+    const allocator = std.testing.allocator;
+
+    var state = app.AppState.init(allocator);
+    defer state.deinit();
+
+    const sda_node = try allocator.dupe(u8, "/dev/sda");
+    var fake_disks = try allocator.alloc(disk.Disk, 1);
+    fake_disks[0] = disk.Disk{
+        .allocator = allocator,
+        .name = "sda",
+        .node = sda_node,
+        .model = "Test Drive",
+        .size_sectors = 1000,
+        .size_bytes = 1000 * 512,
+        .partitions = .empty,
+        .gaps = .empty,
+    };
+
+    state.disks_list = fake_disks;
+    const dtos = try state.toDto(allocator);
+    defer allocator.free(dtos);
+
+    try std.testing.expectEqual(@as(usize, 1), dtos.len);
+    try std.testing.expectEqualStrings("/dev/sda", dtos[0].path);
+    try std.testing.expectEqualStrings("Test Drive", dtos[0].model);
+    try std.testing.expectEqualStrings("GPT", dtos[0].tableType);
 }

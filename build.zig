@@ -39,6 +39,13 @@ pub fn build(b: *std.Build) void {
 
     b.installArtifact(exe);
 
+    // Frontend build step (Bun + Vite)
+    const frontend_cmd = b.addSystemCommand(&.{ "bun", "run", "build" });
+    frontend_cmd.setCwd(b.path("frontend"));
+
+    const ui_step = b.step("ui", "Build the web frontend assets");
+    ui_step.dependOn(&frontend_cmd.step);
+
     const gui_exe = b.addExecutable(.{
         .name = "oscraft-gui",
         .root_module = b.createModule(.{
@@ -53,6 +60,7 @@ pub fn build(b: *std.Build) void {
         }),
     });
 
+    gui_exe.step.dependOn(&frontend_cmd.step);
     b.installArtifact(gui_exe);
 
     const run_step = b.step("run", "Run the CLI app");

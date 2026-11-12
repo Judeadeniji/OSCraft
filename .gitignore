@@ -23,3 +23,10 @@ zig-pkg/
 # OSCraft temporary state
 /run/
 *.log
+
+# Frontend build & dependencies
+frontend/node_modules/
+frontend/dist/
+src/ui/dist/
+.taste-skill/
+

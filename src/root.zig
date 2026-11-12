@@ -18,9 +18,6 @@ const cli_mod = @import("cli/root.zig");
 const safety_mod = @import("system/safety.zig");
 const exec_mod = @import("system/exec.zig");
 const ui_app_mod = @import("ui/app.zig");
-const ui_partition_bar_mod = @import("ui/partition_bar.zig");
-const ui_action_panel_mod = @import("ui/action_panel.zig");
-const ui_modal_mod = @import("ui/modal.zig");
 
 const disk_test = @import("storage/disk_test.zig");
 const btrfs_test = @import("storage/btrfs_test.zig");
@@ -40,9 +37,6 @@ const loopback_gen_test = @import("cli/loopback_gen_test.zig");
 const safety_test = @import("system/safety_test.zig");
 const exec_test = @import("system/exec_test.zig");
 const ui_app_test = @import("ui/app_test.zig");
-const ui_partition_bar_test = @import("ui/partition_bar_test.zig");
-const ui_action_panel_test = @import("ui/action_panel_test.zig");
-const ui_modal_test = @import("ui/modal_test.zig");
 
 const Io = std.Io;
 
@@ -72,9 +66,6 @@ pub const cli = struct {
 
 pub const ui = struct {
     pub const app = ui_app_mod;
-    pub const partition_bar = ui_partition_bar_mod;
-    pub const action_panel = ui_action_panel_mod;
-    pub const modal = ui_modal_mod;
 };
 
 pub fn printBanner(writer: *Io.Writer) Io.Writer.Error!void {
@@ -95,9 +86,6 @@ test {
     _ = system.exec;
     _ = cli.root;
     _ = ui.app;
-    _ = ui.partition_bar;
-    _ = ui.action_panel;
-    _ = ui.modal;
 
     _ = disk_test;
     _ = btrfs_test;
@@ -117,7 +105,4 @@ test {
     _ = safety_test;
     _ = exec_test;
     _ = ui_app_test;
-    _ = ui_partition_bar_test;
-    _ = ui_action_panel_test;
-    _ = ui_modal_test;
 }
