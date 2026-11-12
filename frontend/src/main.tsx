@@ -1,12 +1,15 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { RouterProvider, createRouter } from '@tanstack/react-router'
+import { RouterProvider, createRouter, createHashHistory } from '@tanstack/react-router'
 import { routeTree } from './routeTree.gen'
 import './index.css'
 
-// Create a new router instance
+const hashHistory = createHashHistory()
+
+// Create a new router instance with hash history for robust desktop & file:// embedding
 const router = createRouter({
   routeTree,
+  history: hashHistory,
   defaultPreload: 'intent',
 })
 
