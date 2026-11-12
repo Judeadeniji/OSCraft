@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Ban Co-authored-by trailers: strip them from the commit message.
+set -euo pipefail
+
+msg_file=${1:?commit message file required}
+
+tmp=$(mktemp)
+trap 'rm -f "$tmp"' EXIT
+
+# Drop Co-authored-by lines (any casing / leading whitespace).
+grep -viE '^[[:space:]]*Co-authored-by:' "$msg_file" >"$tmp" || true
+
+# Trim trailing blank lines left behind.
+while [[ -s $tmp ]] && [[ $(tail -n1 "$tmp") == "" ]]; do
+	sed -i '$d' "$tmp"
+done
+
+# Ensure a trailing newline for git.
+printf '%s\n' "$(cat "$tmp")" >"$msg_file"
