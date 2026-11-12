@@ -56,6 +56,46 @@ test "example" {
 }
 ```
 
+### 🚫 ABSOLUTE BAN ON `useEffect`
+- **`useEffect` is strictly banned across this repository.**
+- Never use `useEffect` in React components, pages, or custom hooks.
+- **Rule**: Do not use effects for data fetching, state synchronization, or derived values.
+  - **Data loading**: Use **TanStack Query / React Query** (`useQuery`), TanStack Router route `loader` functions, or event-driven IPC triggers.
+  - **User events & mutations**: Execute side effects directly inside event handlers (`onClick`, `onChange`, `onSubmit`) or mutations (`useMutation`).
+  - **Derived state**: Compute values directly during render.
+  - **Subscriptions / External stores**: Use `useSyncExternalStore`.
+
+```tsx
+// ❌ WRONG (BANNED):
+function DiskList() {
+  const [disks, setDisks] = useState([]);
+  useEffect(() => {
+    fetchDisks().then(setDisks);
+  }, []);
+  return <div>{disks.map(...)}</div>;
+}
+
+// ✅ CORRECT (React Query / TanStack Query):
+function DiskList() {
+  const { data: disks = [] } = useQuery({
+    queryKey: ['disks'],
+    queryFn: fetchDisks,
+  });
+  return <div>{disks.map(...)}</div>;
+}
+
+// ✅ ALSO CORRECT (TanStack Router loader):
+export const Route = createFileRoute('/')({
+  loader: async () => fetchDisks(),
+  component: DiskList,
+});
+
+function DiskList() {
+  const disks = Route.useLoaderData();
+  return <div>{disks.map(...)}</div>;
+}
+```
+
 ### Module Header Standards
 Every new or modified Zig source file in `src/` must retain or include the canonical module header:
 
