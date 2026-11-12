@@ -8,10 +8,14 @@ const std = @import("std");
 const disk_mod = @import("storage/disk.zig");
 const btrfs_mod = @import("storage/btrfs.zig");
 const efi_mod = @import("boot/efi.zig");
+const kexec_mod = @import("boot/kexec.zig");
+const loopback_mod = @import("boot/loopback.zig");
 
 const disk_test = @import("storage/disk_test.zig");
 const btrfs_test = @import("storage/btrfs_test.zig");
 const efi_test = @import("boot/efi_test.zig");
+const kexec_test = @import("boot/kexec_test.zig");
+const loopback_test = @import("boot/loopback_test.zig");
 
 const Io = std.Io;
 
@@ -22,6 +26,8 @@ pub const storage = struct {
 
 pub const boot = struct {
     pub const efi = efi_mod;
+    pub const kexec = kexec_mod;
+    pub const loopback = loopback_mod;
 };
 
 pub fn printBanner(writer: *Io.Writer) Io.Writer.Error!void {
@@ -32,7 +38,11 @@ test {
     _ = storage.disk;
     _ = storage.btrfs;
     _ = boot.efi;
+    _ = boot.kexec;
+    _ = boot.loopback;
     _ = disk_test;
     _ = btrfs_test;
     _ = efi_test;
+    _ = kexec_test;
+    _ = loopback_test;
 }
