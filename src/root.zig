@@ -9,6 +9,7 @@ const Io = std.Io;
 
 pub const storage = struct {
     pub const disk = @import("storage/disk.zig");
+    pub const btrfs = @import("storage/btrfs.zig");
 };
 
 pub fn printBanner(writer: *Io.Writer) Io.Writer.Error!void {
@@ -17,5 +18,7 @@ pub fn printBanner(writer: *Io.Writer) Io.Writer.Error!void {
 
 test {
     _ = storage.disk;
+    _ = storage.btrfs;
     _ = @import("storage/disk_test.zig");
+    _ = @import("storage/btrfs_test.zig");
 }
