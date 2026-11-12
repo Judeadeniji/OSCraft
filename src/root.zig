@@ -11,6 +11,8 @@ const efi_mod = @import("boot/efi.zig");
 const kexec_mod = @import("boot/kexec.zig");
 const loopback_mod = @import("boot/loopback.zig");
 const cli_mod = @import("cli/root.zig");
+const safety_mod = @import("system/safety.zig");
+const exec_mod = @import("system/exec.zig");
 
 const disk_test = @import("storage/disk_test.zig");
 const btrfs_test = @import("storage/btrfs_test.zig");
@@ -22,6 +24,8 @@ const scan_test = @import("cli/scan_test.zig");
 const boot_clean_test = @import("cli/boot_clean_test.zig");
 const kexec_stage_test = @import("cli/kexec_stage_test.zig");
 const loopback_gen_test = @import("cli/loopback_gen_test.zig");
+const safety_test = @import("system/safety_test.zig");
+const exec_test = @import("system/exec_test.zig");
 
 const Io = std.Io;
 
@@ -34,6 +38,11 @@ pub const boot = struct {
     pub const efi = efi_mod;
     pub const kexec = kexec_mod;
     pub const loopback = loopback_mod;
+};
+
+pub const system = struct {
+    pub const safety = safety_mod;
+    pub const exec = exec_mod;
 };
 
 pub const cli = struct {
@@ -50,6 +59,8 @@ test {
     _ = boot.efi;
     _ = boot.kexec;
     _ = boot.loopback;
+    _ = system.safety;
+    _ = system.exec;
     _ = cli.root;
     _ = disk_test;
     _ = btrfs_test;
@@ -61,4 +72,6 @@ test {
     _ = boot_clean_test;
     _ = kexec_stage_test;
     _ = loopback_gen_test;
+    _ = safety_test;
+    _ = exec_test;
 }
