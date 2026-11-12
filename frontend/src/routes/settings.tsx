@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { Settings, Server, Layers, Cpu, Code2, Globe } from 'lucide-react'
+import { Gear, HardDrives } from '@phosphor-icons/react'
 
 export const Route = createFileRoute('/settings')({
   component: SettingsComponent,
@@ -7,17 +7,19 @@ export const Route = createFileRoute('/settings')({
 
 function SettingsComponent() {
   return (
-    <div className="space-y-7 max-w-4xl mx-auto">
+    <div className="space-y-8 max-w-4xl mx-auto">
       {/* Header */}
       <div className="flex items-center gap-4 pb-2">
-        <div className="size-13 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-xs border border-blue-100/60">
-          <Settings className="size-6 stroke-[2.2]" />
+        <div className="p-1 rounded-2xl bg-blue-50/70 border border-blue-100/60 shadow-2xs">
+          <div className="size-12 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs">
+            <Gear className="size-6" weight="bold" />
+          </div>
         </div>
         <div>
           <h1 className="text-xl font-bold tracking-tight text-slate-900 leading-tight">
             Settings & Runtime Parameters
           </h1>
-          <p className="text-xs font-medium text-slate-400 mt-0.5">
+          <p className="text-xs font-semibold text-slate-500 mt-0.5">
             nanoui System Webview IPC bridge diagnostics and frontend stack configurations.
           </p>
         </div>
@@ -25,10 +27,10 @@ function SettingsComponent() {
 
       {/* Settings Grid */}
       <div className="grid gap-6">
-        <div className="bg-white rounded-3xl border border-slate-100 shadow-xs p-6 space-y-5">
+        <div className="bg-white rounded-3xl border border-slate-200/70 shadow-2xs p-6 space-y-5">
           <div className="flex items-center gap-3">
-            <div className="size-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100">
-              <Server className="size-5" />
+            <div className="size-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100 shadow-2xs">
+              <HardDrives className="size-5" weight="bold" />
             </div>
             <div>
               <h2 className="font-bold text-sm text-slate-900">Frontend Environment</h2>
@@ -37,33 +39,39 @@ function SettingsComponent() {
           </div>
 
           <div className="space-y-2.5 text-xs">
-            <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100">
+            <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-200/50">
               <span className="text-slate-600 font-medium">Package Manager</span>
-              <span className="font-mono text-[11px] font-bold text-slate-800 bg-white px-3 py-1 rounded-full border border-slate-200">
+              <span className="font-mono text-[11px] font-bold text-slate-800 bg-white px-3 py-1 rounded-full border border-slate-200 shadow-2xs">
                 Bun 1.4.x
               </span>
             </div>
-            <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100">
+            <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-200/50">
               <span className="text-slate-600 font-medium">UI Framework</span>
-              <span className="font-mono text-[11px] font-bold text-slate-800 bg-white px-3 py-1 rounded-full border border-slate-200">
+              <span className="font-mono text-[11px] font-bold text-slate-800 bg-white px-3 py-1 rounded-full border border-slate-200 shadow-2xs">
                 React 19 + TypeScript
               </span>
             </div>
-            <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100">
+            <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-200/50">
+              <span className="text-slate-600 font-medium">Icon System</span>
+              <span className="font-mono text-[11px] font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-100 shadow-2xs">
+                Phosphor Icons (@phosphor-icons/react)
+              </span>
+            </div>
+            <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-200/50">
               <span className="text-slate-600 font-medium">Routing System</span>
-              <span className="font-mono text-[11px] font-bold text-slate-800 bg-white px-3 py-1 rounded-full border border-slate-200">
+              <span className="font-mono text-[11px] font-bold text-slate-800 bg-white px-3 py-1 rounded-full border border-slate-200 shadow-2xs">
                 TanStack Router (File-Based)
               </span>
             </div>
-            <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100">
+            <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-200/50">
               <span className="text-slate-600 font-medium">Styling Engine</span>
-              <span className="font-mono text-[11px] font-bold text-slate-800 bg-white px-3 py-1 rounded-full border border-slate-200">
+              <span className="font-mono text-[11px] font-bold text-slate-800 bg-white px-3 py-1 rounded-full border border-slate-200 shadow-2xs">
                 Tailwind CSS v4 (@tailwindcss/vite)
               </span>
             </div>
-            <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100">
+            <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-200/50">
               <span className="text-slate-600 font-medium">Host Webview IPC</span>
-              <span className="font-mono text-[11px] font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
+              <span className="font-mono text-[11px] font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100 shadow-2xs">
                 nanoui IPC Bridge (Zig Native)
               </span>
             </div>
